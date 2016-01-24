@@ -1,0 +1,33 @@
+# Selenium Hub, which parcels out browsers to test runners
+hub:
+  image: 'selenium/hub:2.45.0'
+  expose:
+    - 4444
+  ports:
+    - '4444:4444'
+# In Selenium parlance a 'node' hosts the browser
+node:
+  build: 'node'
+  ports:
+    - 5900
+  links:
+    - hub
+    - nginx
+nginx:
+  build: 'nginx'
+  expose:
+    - '80'
+  ports:
+    - '8081:80'
+  volumes:
+    - ~/jenkins_home/userContent:/usr/share/nginx/html
+# The Jenkins server.  See README for details on SSH certs for talking to the slave
+jenkins:
+  image: 'jenkins:1.596.2'
+  ports:
+    - '8080:8080'
+  volumes:
+    - ~/jenkins_home:/var/jenkins_home
+  links:
+    - nginx
+    - hub
